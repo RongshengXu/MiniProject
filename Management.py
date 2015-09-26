@@ -1,11 +1,31 @@
 __author__ = 'rongshengxu'
 
-from PAGE import \
-    MANAGEMENT_PAGE, ERROR_HTML
-
 from google.appengine.api import users
 import webapp2
 
+MANAGEMENT_PAGE = """\
+<html>
+  <body>
+  <h1>Connex.us</h1>
+  <a href='management'>Manage| </a>
+  <a href='create'>Create| </a>
+  <a href='view'>View |</a>
+  <a href='search'>Search |</a>
+  <a href='trending'>Trending |</a>
+  <a href='social'>Social |</a>
+  <a href=%s>Log out </a>
+  <br>
+  </body>
+</html>
+"""
+
+ERROR_HTML = """\
+<html>
+  <body>
+  <a href=%s> You need to log in first </a>
+  </body>
+</html>
+"""
 
 class Management(webapp2.RequestHandler):
     def get(self):

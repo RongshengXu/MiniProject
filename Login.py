@@ -1,8 +1,17 @@
 __author__ = 'rongshengxu'
 
-from PAGE import LOGIN_PAGE_HTML
 from google.appengine.api import users
 import webapp2
+
+LOGIN_PAGE_HTML = """\
+<html>
+  <body>
+    <h1>Welcome to Connexus!</h1>
+    <h2>Share the world!</h2>
+    <a href=%s> Log in </a>
+   </body>
+</html>
+"""
 
 class LoginPage(webapp2.RequestHandler):
     def get(self):

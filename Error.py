@@ -1,10 +1,11 @@
 __author__ = 'rongshengxu'
 
+
 from Stream import StreamModel
 from google.appengine.api import users
 import webapp2
 
-VIEW_PAGE_HTML = """\
+ERROR_PAGE_HTML = """\
 <!DOCTYPE html>
 <html>
 <body>
@@ -12,28 +13,31 @@ VIEW_PAGE_HTML = """\
 	<table cellspacing="15">
 		<tr>
 			<th>Manage</th>
-			<td><a href="createstream">Create</a></td>
-			<td style="background-color:gray"><a href="viewallstream">View</a></td>
+			<td><a href="create">Create</a></td>
+			<td><a href="view">View</a></td>
 			<td><a href="search">Search</a></td>
 			<td><a href="trending">Trending</a></td>
 			<td><a href="social">Social</a></td>
 		</tr>
 	</table>
 	<hr size="5" />
-  	<h3>View All Streams</h3>
-	<table border="1" style="width:100%">
+	<table>
 		<tr>
-			<td>This line is for the streams</td>
+			<td><img src="http://nerdsngeeks.net/wp-content/uploads/2014/01/error.png"></td>
+			<td>
+				<p style="color:red"><big>Error: you tried to create a new stream whose name is the same as an existing stream;
+				operation did not complete.</big></p>
+			</td>
 		</tr>
 	</table>
 </body>
 </html>
 """
 
-class View(webapp2.RequestHandler):
+class Error(webapp2.RequestHandler):
     def get(self):
-        streams = StreamModel.query(StreamModel.name==users.get_current_uesr()).order(-StreamModel.createTime)
+        self.request.write(ERROR_PAGE_HTML)
 
 app = webapp2.WSGIApplication([
-    ('/view', View)
+    ('/error', Error)
 ], debug=True)
