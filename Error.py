@@ -12,7 +12,7 @@ ERROR_PAGE_HTML = """\
 	<h1>Connex.us</h1>
 	<table cellspacing="15">
 		<tr>
-			<th>Manage</th>
+			<th><a href="management">Manage</th>
 			<td><a href="create">Create</a></td>
 			<td><a href="view">View</a></td>
 			<td><a href="search">Search</a></td>
@@ -36,7 +36,7 @@ ERROR_PAGE_HTML = """\
 
 class Error(webapp2.RequestHandler):
     def get(self):
-        self.request.write(ERROR_PAGE_HTML)
+        self.response.write(ERROR_PAGE_HTML)
 
 app = webapp2.WSGIApplication([
     ('/error', Error)

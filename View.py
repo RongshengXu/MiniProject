@@ -2,6 +2,7 @@ __author__ = 'rongshengxu'
 
 from Stream import StreamModel
 from google.appengine.api import users
+from google.appengine.ext import ndb
 import webapp2
 
 VIEW_PAGE_HTML = """\
@@ -11,11 +12,16 @@ VIEW_PAGE_HTML = """\
 	<h1>Connex.us</h1>
 	<table cellspacing="15">
 		<tr>
-			<th>Manage</th>
-			<td><a href="createstream">Create</a></td>
-			<td style="background-color:gray"><a href="viewallstream">View</a></td>
+			<td><a href="management">Manage</a></td>
+			<th>|</th>
+			<td><a href="create">Create</a></td>
+			<th>|</th>
+			<td style="background-color:gray"><a href="view">View</a></td>
+			<th>|</th>
 			<td><a href="search">Search</a></td>
+			<th>|</th>
 			<td><a href="trending">Trending</a></td>
+			<th>|</th>
 			<td><a href="social">Social</a></td>
 		</tr>
 	</table>
@@ -30,10 +36,27 @@ VIEW_PAGE_HTML = """\
 </html>
 """
 
+STREAM_ENTRY_TEMPLATE = """\
+<td><a href=%s><image src=%s alt=%s height="42" width="42"></image></td>
+"""
+
 class View(webapp2.RequestHandler):
     def get(self):
-        streams = StreamModel.query(StreamModel.name==users.get_current_uesr()).order(-StreamModel.createTime)
-
+        stream_query = StreamModel.query().order(StreamModel.createTime)
+        streams = stream_query.fetch()
+        num = 0;
+        self.response.write(VIEW_PAGE_HTML)
+        self.response.write('<table>')
+        for stream in streams:
+            if num==0:
+                self.response.write("<tr>")
+            self.response.write(STREAM_ENTRY_TEMPLATE % (stream.url, stream.coverpageURL, stream.name))
+            if num==3:
+                self.response.write("</tr>")
+                num = 0;
+            else:
+                num += 1
+        self.response.write('</table>')
 app = webapp2.WSGIApplication([
     ('/view', View)
 ], debug=True)

@@ -4,11 +4,43 @@ api_version: 1
 threadsafe: true
 
 handlers:
-- url: /error
-  script: Error.app
+- url: /searchresult
+  script: Search.app
   login: required
 
+- url: /search
+  script: Search.app
+  login: required
+
+- url: /showmore.*
+  script: ViewSingle.app
+  login: required
+
+- url: /pic.*
+  script: ViewSingle.app
+  login: required
+
+- url: /upload
+  script: ViewSingle.app
+  login: required
+
+- url: /stream.*
+  script: ViewSingle.app
+  login: required
+
+- url: /sign
+  script: Create.app
+  login: required
+
+- url: /error
+  script: Error.app
+  #login: required
+
 - url: /management
+  script: Management.app
+  login: required
+
+- url: /deletestream
   script: Management.app
   login: required
 
@@ -34,8 +66,11 @@ handlers:
 
 - url: /.*
   script: Login.app
-  #slogin: required
+  #login: required
 
 libraries:
 - name: webapp2
+  version: latest
+
+- name: PIL
   version: latest
