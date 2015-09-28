@@ -15,6 +15,10 @@ handlers:
   script: ManagementHandler.app
   login: required
 
+- url: /unsubscribe
+  script: ManagementHandler.app
+  login: required
+
 - url: /create
   script: CreateHandler.app
   login: required
