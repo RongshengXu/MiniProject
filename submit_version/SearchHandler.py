@@ -55,22 +55,24 @@ class Search(webapp2.RequestHandler):
 class SearchResult(webapp2.RequestHandler):
     def get(self):
         self.response.write(SEARCH_PAGE_TEMPLATE)
-        returnURL = self.request.headers['Referer']
+        #returnURL = self.request.headers['Referer']
         #self.response.write(self.response.url)
         pattern = self.request.get("searchPattern")
+        found_in_tag = False
         Name = []
-        StreamName = []
+        #StreamName = []
         streams = StreamModel.query().fetch()
         for st in streams:
             Name.append(st.name)
         num = 0
         for name in Name:
             fi = re.findall(pattern, name)
-            #self.response.write(name)
-            #self.response.write(fi)
-            if len(fi)>0:
-                stream = StreamModel.query(StreamModel.name==name).fetch()[0]
-                StreamName.append(name)
+            stream = StreamModel.query(StreamModel.name==name).fetch()[0]
+            for tag in stream.tag:
+                if len(re.findall(pattern,tag))>0:
+                    found_in_tag = True
+            if len(fi)>0 or found_in_tag==True:
+                #StreamName.append(name)
                 if num==0:
                     self.response.write("<tr>")
                 self.response.write(STREAM_ENTRY_TEMPLATE % (stream.url, stream.coverpageURL, stream.name))
