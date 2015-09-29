@@ -26,6 +26,7 @@ handlers:
 
 - url: /manage
   script: ManagementHandler.app
+  login: required
 
 - url: /deletestream
   script: ManagementHandler.app

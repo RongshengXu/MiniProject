@@ -34,8 +34,8 @@ CREATE_PAGE_TEMPLATE = """\
     <form action="/sign" method="post">
         <table>
             <tr>
-                <td><textarea name="streamname" rows="3" cols="60" placeholder = "Lucknow Christian College"></textarea></td>
-                <td><textarea name="streamtags" rows="3" cols="60" placeholder = "#LucknowChristianCollege, #1985"></textarea></td>
+                <td><textarea name="streamname" rows="3" cols="60" placeholder = "Big news"></textarea></td>
+                <td><textarea name="streamtags" rows="3" cols="60" placeholder = "#UTexas, #Too young too simple, #Naive"></textarea></td>
             </tr>
             <tr>
                 <td align="center" valign="top"><b><big>Name Your Stream</big></b></td>
@@ -48,7 +48,7 @@ CREATE_PAGE_TEMPLATE = """\
         <table>
             <tr>
                 <td><textarea name="subscribers" rows="3" cols="60" placeholder = "Input subscribers' emails"></textarea></td>
-                <td><textarea name="url" rows="3" cols="60" placeholder = "http://flickr.com/tiger-image.png"></textarea></td>
+                <td><textarea name="url" rows="3" cols="60" placeholder = "cover page URL"></textarea></td>
             </tr>
             <tr>
                 <td><textarea name="context" rows="3" cols="60" placeholder="Option message for invite" ></textarea></td>
@@ -97,7 +97,8 @@ class Create(webapp2.RequestHandler):
             if (len(stream_subscribers)>0):
                 for email in stream_subscribers:
                     if len(email)>0:
-                        mail.send_mail(sender=users.get_current_user(), to=email, subject="Create", body="Stream "+ stream_name + " is created")
+                        mail.send_mail(sender=users.get_current_user(), to=email,
+                                       subject="Stream "+ stream_name + " is created.", body= stream_message )
                 stream.subscribers = stream_subscribers
             if (len(stream_message)>0):
                 stream.message = stream_message

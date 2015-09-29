@@ -89,7 +89,7 @@ class ViewSingle(webapp2.RequestHandler):
                 index += 1
                 self.response.write(PICTURE_ENTRY_TEMPLATE % picture.key())
         self.response.write('</tr></table>')
-        morePictureURL = urllib.urlencode({'showmore':user.nickname()+"=="+stream_name})
+        morePictureURL = urllib.urlencode({'showmore':user.nickname()+"=="+stream_name+"++0"})
         self.response.write(MORE_ENTRY_TEMPLATE % morePictureURL)
         if (stream.author == user):
             self.response.write(UPLOAD_ENTRY_TEMPLATE)
