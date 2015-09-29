@@ -52,6 +52,12 @@ SUBSCRIBE_ENTRY_TEMPLATE = """\
 </form>
 """
 
+UNSUBSCRIBE_ENTRY_TEMPLATE = """\
+<form action="%s" method="post">
+    <input type="submit" value="Unsubscribe">
+</form>
+"""
+
 MORE_ENTRY_TEMPLATE = """\
 <form action="%s" ,method="post">
     <input type="submit" value="More Pictures">
@@ -95,7 +101,13 @@ class ViewSingle(webapp2.RequestHandler):
                 countView.total = countView.total + 1
                 countView.put()
             url = urllib.urlencode({'subscribe':stream_name})
-            self.response.write(SUBSCRIBE_ENTRY_TEMPLATE % url)
+
+            if user.nickname() in stream.subscribers:
+                url = urllib.urlencode({'unsubscribesingle':stream_name})
+                self.response.write(UNSUBSCRIBE_ENTRY_TEMPLATE % url)
+            else:
+                url = urllib.urlencode({'subscribe':stream_name})
+                self.response.write(SUBSCRIBE_ENTRY_TEMPLATE % url)
 
 class ViewPictureHandler(webapp2.RequestHandler):
     def get(self):
@@ -174,11 +186,25 @@ class Subscirbe(webapp2.RequestHandler):
             stream.put()
         self.redirect(returnURL)
 
+class UnsubscribeSingle(webapp2.RequestHandler):
+    def post(self):
+        returnURL = self.request.headers['Referer']
+        self.response.write(self.request.url)
+        stream_name = re.findall("unsubscribesingle%3D(.*)",self.request.url)[0]
+        self.response.write(stream_name)
+        stream_query = StreamModel.query(StreamModel.name==stream_name).fetch()
+        if len(stream_query)>0:
+            stream = stream_query[0]
+            stream.subscribers.remove(users.get_current_user().nickname())
+            stream.put()
+        self.redirect(returnURL)
+
 app = webapp2.WSGIApplication([
     ('/showmore.*', ShowMore),
     ('/stream.*', ViewSingle),
     ('/upload', Upload),
     ('/pic.*', ViewPictureHandler),
     ('/subscribe.*', Subscirbe),
-    ('/clearviewcount', clearViewCount)
+    ('/clearviewcount', clearViewCount),
+    ('/unsubscribesingle.*', UnsubscribeSingle)
 ], debug=True)
