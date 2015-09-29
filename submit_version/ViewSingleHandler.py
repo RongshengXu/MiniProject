@@ -149,14 +149,15 @@ class ShowMore(webapp2.RequestHandler):
         stream_name = re.findall('%3D(.*)%3D%3D', self.request.url)[0]
         oldIndex = int(re.findall('%3D%3D(.*)', self.request.url)[0])
         countView_query = CountViewModel.query(CountViewModel.name==stream_name).fetch()
-        if len(countView_query)>0:
+        stream = StreamModel.query(StreamModel.name == stream_name).fetch()[0]
+
+        if len(countView_query)>0 and stream.author != users.get_current_user():
             countView = countView_query[0]
             countView.count = countView.count - 1
             countView.total = countView.total - 1
             countView.put()
         global index
 
-        stream = StreamModel.query(StreamModel.name == stream_name).fetch()[0]
         index = oldIndex + NUM_PICTURE_PER_STREAM
         if index >= stream.totalPicture:
             index = 0
