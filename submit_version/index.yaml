@@ -10,16 +10,17 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: CountViewModel
+  ancestor: yes
+  properties:
+  - name: count
+    direction: desc
+
 - kind: PictureModel
   ancestor: yes
   properties:
   - name: uploadDate
     direction: desc
-
-- kind: StreamModel
-  properties:
-  - name: author
-  - name: createTime
 
 - kind: StreamModel
   properties:

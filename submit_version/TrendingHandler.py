@@ -109,7 +109,8 @@ class Update(webapp2.RequestHandler):
 
 class CountDown(webapp2.RequestHandler):
     def get(self):
-        mail.send_mail(sender=users.get_current_user(), to="xurongsheng2010@gmail.com", subject="test", body=DEFAULT_TRENDING_MESSAGE)
+        sender = "Connexus@example.com"
+        mail.send_mail(sender=sender, to="xurongsheng2010@gmail.com", subject="test", body=DEFAULT_TRENDING_MESSAGE)
         cd_query = CountModel.query(CountModel.name=="Trending").fetch()
         if (len(cd_query)>0):
             cd = cd_query[0]
@@ -118,9 +119,9 @@ class CountDown(webapp2.RequestHandler):
                 if (cd.count == cd.freq):
                     cd.count = 0
                     subject = DEFAULT_TRENDING_SUBJECT + users.get_current_user()
-                    mail.send_mail(sender=users.get_current_user(), to=TAEmail, subject=subject, body=DEFAULT_TRENDING_MESSAGE)
-                    mail.send_mail(sender=users.get_current_user(), to="xurongsheng2010@gmail.com", subject=subject, body=DEFAULT_TRENDING_MESSAGE)
-                    mail.send_mail(sender=users.get_current_user(), to="yangxuanemail@gmail.com", subject=subject, body=DEFAULT_TRENDING_MESSAGE)
+                    mail.send_mail(sender=sender, to=TAEmail, subject=subject, body=DEFAULT_TRENDING_MESSAGE)
+                    mail.send_mail(sender=sender, to="xurongsheng2010@gmail.com", subject=subject, body=DEFAULT_TRENDING_MESSAGE)
+                    mail.send_mail(sender=sender, to="yangxuanemail@gmail.com", subject=subject, body=DEFAULT_TRENDING_MESSAGE)
                 cd.put()
 
 app = webapp2.WSGIApplication([
