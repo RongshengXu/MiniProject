@@ -18,7 +18,7 @@ handlers:
 
 - url: /countdown
   script: TrendingHandler.app
-  login: required
+  login: admin
 
 - url: /error
   script: ErrorHandler.app
@@ -53,6 +53,14 @@ handlers:
 
 - url: /search
   script: SearchHandler.app
+  login: required
+
+- url: /clearviewcount
+  script: ViewSingleHandler.app
+  login: required
+
+- url: /subscribe.*
+  script: ViewSingleHandler.app
   login: required
 
 - url: /showmore.*

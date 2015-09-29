@@ -48,7 +48,7 @@ UPLOAD_ENTRY_TEMPLATE = """\
 
 SUBSCRIBE_ENTRY_TEMPLATE = """\
 <form action="%s" method="post">
-    <input type="submit" name="Subscribe" value="Subscribe">
+    <input type="submit" value="Subscribe">
 </form>
 """
 
@@ -94,8 +94,8 @@ class ViewSingle(webapp2.RequestHandler):
                 countView.count = countView.count + 1
                 countView.total = countView.total + 1
                 countView.put()
-            url = urllib.urlencode({"subscribe":stream_name})
-            self.response.write(SUBSCRIBE_ENTRY_TEMPLATE, url)
+            url = urllib.urlencode({'subscribe':stream_name})
+            self.response.write(SUBSCRIBE_ENTRY_TEMPLATE % url)
 
 class ViewPictureHandler(webapp2.RequestHandler):
     def get(self):
@@ -162,12 +162,17 @@ class clearViewCount(webapp2.RequestHandler):
                 count.put()
 
 class Subscirbe(webapp2.RequestHandler):
-    def get(self):
+    def post(self):
+        returnURL = self.request.headers['Referer']
+        self.response.write(self.request.url)
         stream_name = re.findall("subscribe%3D(.*)",self.request.url)[0]
-        stream_query = StreamModel.query(StreamModel==stream_name).fetch()
+        self.response.write(stream_name)
+        stream_query = StreamModel.query(StreamModel.name==stream_name).fetch()
         if len(stream_query)>0:
             stream = stream_query[0]
-            
+            stream.subscribers.append(users.get_current_user().nickname())
+            stream.put()
+        self.redirect(returnURL)
 
 app = webapp2.WSGIApplication([
     ('/showmore.*', ShowMore),
