@@ -1,6 +1,7 @@
 cron:
 - url: /countdown
-  schedule: every 5 mins
+  schedule: every 1 minutes
+
 - description: clear view count
   url: /clearviewcount
   schedule: every 1 hours

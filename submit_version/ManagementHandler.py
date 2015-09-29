@@ -1,6 +1,6 @@
 from google.appengine.api import users
 
-from Stream import StreamModel, PictureModel
+from Stream import StreamModel, PictureModel, CountViewModel
 from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import ndb
@@ -100,8 +100,9 @@ class deleteStream(webapp2.RequestHandler):
     def post(self):
         returnURL = self.request.headers['Referer']
         streams = self.request.get_all("deleteStream")
-
         if len(streams) > 0:
+            countViews = CountViewModel.query(CountViewModel.name.IN(streams)).fetch()
+            ndb.delete_multi(ndb.put_multi(countViews))
             stream_query = StreamModel.query(StreamModel.name.IN(streams), StreamModel.author==users.get_current_user())
             streams = stream_query.fetch()
             for stream in streams:
