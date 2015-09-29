@@ -26,21 +26,6 @@ TRENDING_PAGE_TEMPLATE = """\
     </table>
     <hr size="5" />
     <h3>Top 3 Trending Streams</h3>
-    <table border="1" style="width:100%">
-        <tr>
-            <td>This line is for the top 3 trending streams</td>
-        </tr>
-    </table>
-    <hr>
-    <h3>Email trending report</h3>
-    <form action="/update" method="post">
-        <input type="radio" name="frequency" value="No reports" checked>No reports</input><br>
-        <input type="radio" name="frequency" value="Every 5 minutes">Every 5 minutes</input><br>
-        <input type="radio" name="frequency" value="Every 1 hour">Every 1 hour</input><br>
-        <input type="radio" name="frequency" value="Every day">Every day</input><br>
-        <input type="submit" value="Update rate">
-    </form>
-    <hr>
 </body>
 </html>
 """
@@ -53,19 +38,46 @@ TAEmail = "xurongsheng2010@gmail.com"
 
 STREAM_ENTRY_TEMPLATE = """\
 <td>
-    <a href="%s">
-        <div style = "position:relative;">
-            <img src="%s" height="100" width="100"></img>
-            <div style = "position: relative; left:0px; top:0px">%s</div>
-            <div style = "position: relative; left:0px; top:5px">%s</div>
-        </div>
-    </a>
+    <div style = "position:relative;">
+        <a href="%s">
+            <img src="%s" height="150" width="150"></img>
+            <div style = "position: relative; left:65px; top:0px">%s</div>
+        </a>
+        <div style = "position: relative; left:10px; top:5px">%s</div>
+    </div>
 </td>
+"""
+
+TRENDING_REPORT_TEMPLATE = """\
+<h3>Email trending report</h3>
+<form action="/update" method="post">
+    <input type="radio" name="frequency" value="No reports" checked>No reports</input><br>
+    <input type="radio" name="frequency" value="Every 5 minutes">Every 5 minutes</input><br>
+    <input type="radio" name="frequency" value="Every 1 hour">Every 1 hour</input><br>
+    <input type="radio" name="frequency" value="Every day">Every day</input><br>
+    <input type="submit" value="Update rate">
+</form>
+<hr>
 """
 
 class Trending(webapp2.RequestHandler):
     def get(self):
         self.response.write(TRENDING_PAGE_TEMPLATE)
+        countView_query = CountViewModel.query().order(-CountViewModel.count).fetch()
+        index = 0
+        self.response.write('<table border="0" style="width:100%">')
+        if len(countView_query)> 0:
+            for view in countView_query:
+                if index < 3:
+                    index += 1
+                    stream_query = StreamModel.query(StreamModel.name == view.name).fetch()
+                    if len(stream_query)>0:
+                        stream = stream_query[0]
+                        self.response.write(STREAM_ENTRY_TEMPLATE % (stream.url, stream.coverpageURL, stream.name, str(view.count) + " views in past hour"))
+
+        self.response.write('</table><hr>')
+
+        self.response.write(TRENDING_REPORT_TEMPLATE)
         count_query = CountModel.query(CountModel.name=="Trending").fetch()
         if len(count_query)==0:
             count = CountModel(name="Trending", count=0, freq=0)
@@ -74,16 +86,6 @@ class Trending(webapp2.RequestHandler):
         else:
             count = count_query[0]
             self.response.write("Present frequency: "+freq_dict[count.freq])
-        countView_query = CountViewModel.query().order(-CountViewModel.count).fetch()
-        index = 0
-        if len(countView_query)>0:
-            for view in countView_query:
-                if index < 3:
-                    index += 1
-                    stream_query = StreamModel.query(StreamModel.name == view.name).fetch()
-                    if len(stream_query)>0:
-                        stream = stream_query[0]
-                        self.response.write(STREAM_ENTRY_TEMPLATE % (stream.url, stream.coverpageURL, stream.name,"view:" + str(view.count)))
 
 class Update(webapp2.RequestHandler):
     def post(self):

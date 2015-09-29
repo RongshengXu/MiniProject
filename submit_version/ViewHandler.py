@@ -37,8 +37,8 @@ STREAM_ENTRY_TEMPLATE = """\
 <td>
     <a href="%s">
         <div style = "position:relative;">
-            <img src="%s" height="100" width="100"></img>
-            <div style = "position: relative; left:0px; top:0px">%s</div>
+            <img src="%s" height="150" width="150"></img>
+            <div style = "position: relative; left:65px; top:0px">%s</div>
         </div>
     </a>
 </td>
@@ -50,7 +50,7 @@ class View(webapp2.RequestHandler):
         stream_query = StreamModel.query().order(StreamModel.createTime)
         streams = stream_query.fetch()
         num = 0
-        self.response.write('<table border="1" style="width:100%">')
+        self.response.write('<table border="0" style="width:100%">')
         if len(streams) > 0:
             for stream in streams:
                 if num==0:

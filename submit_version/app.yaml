@@ -63,6 +63,10 @@ handlers:
   script: ViewSingleHandler.app
   login: required
 
+- url: /unsubscribesingle.*
+  script: ViewSingleHandler.app
+  login: required
+
 - url: /showmore.*
   script: ViewSingleHandler.app
   login: required
