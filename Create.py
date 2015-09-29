@@ -67,7 +67,7 @@ CREATE_PAGE_TEMPLATE = """\
 </html>
 """
 
-DEFAULT_CREATE_STREAM_NAME = "Untitled"
+DEFAULT_CREATE_STREAM_NAME = 'Untitled'
 
 class CreatePage(webapp2.RequestHandler):
     def get(self):
@@ -75,7 +75,9 @@ class CreatePage(webapp2.RequestHandler):
 
 class Create(webapp2.RequestHandler):
     def post(self):
-        stream_name = self.request.get('streamname', DEFAULT_CREATE_STREAM_NAME)
+        stream_name = self.request.get('streamname', default_value=DEFAULT_CREATE_STREAM_NAME)
+        if (len(stream_name)==0):
+            stream_name = "Untitled"
         stream_tags = self.request.get('streamtags').split(',')
         stream_subscribers = self.request.get('subscribers').split(',')
         stream_message = self.request.get('context')

@@ -1,10 +1,9 @@
 from google.appengine.api import users
 import webapp2
 
-import cgi
 import urllib
-from Stream import StreamModel
-from google.appengine.ext import ndb
+from Stream import StreamModel, CountViewModel
+from google.appengine.api import mail
 
 import re
 
@@ -82,9 +81,13 @@ class Create(webapp2.RequestHandler):
         stream_message = self.request.get('context')
         stream_coverpageURL = self.request.get('url')
 
-        stream_query = StreamModel.query(StreamModel.name == stream_name,
-                                         StreamModel.author == users.get_current_user()).fetch()
+        stream_query = StreamModel.query(StreamModel.name == stream_name).fetch()
         if (len(stream_query)==0):
+            countView = CountViewModel()
+            countView.count = 0
+            countView.total = 0
+            countView.name = stream_name
+            countView.put()
             stream = StreamModel()
             stream.name = stream_name
             stream.author = users.get_current_user()
@@ -92,6 +95,8 @@ class Create(webapp2.RequestHandler):
             stream.url = urllib.urlencode({'streamname': stream.name})
             stream.totalPicture = 0;
             if (len(stream_subscribers)>0):
+                for email in stream_subscribers:
+                    mail.send_mail(sender=users.get_current_user(), to=email, subject="Create", body="Stream "+ stream_name + " is created")
                 stream.subscribers = stream_subscribers
             if (len(stream_message)>0):
                 stream.message = stream_message

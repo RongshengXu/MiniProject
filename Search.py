@@ -38,8 +38,8 @@ class Search(webapp2.RequestHandler):
         self.response.write(SEARCH_PAGE_TEMPLATE)
 
 class SearchResult(webapp2.RequestHandler):
-    def get(self):
-
+    def post(self):
+        self.response.write("result")
 
 app = webapp2.WSGIApplication([
     ('/search', Search),

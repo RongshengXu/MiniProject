@@ -1,0 +1,4 @@
+cron:
+- description: 5 mins countdown
+  url: /countdown
+  schedule: every 1 mins

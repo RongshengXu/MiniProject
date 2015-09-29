@@ -17,6 +17,20 @@ class StreamModel(ndb.Model):
     coverpageURL = ndb.StringProperty()
     totalPicture = ndb.IntegerProperty()
 
+class CountModel(ndb.Model):
+    """Count view number
+    """
+    name = ndb.StringProperty()
+    count = ndb.IntegerProperty()
+    freq = ndb.IntegerProperty()
+
+class CountViewModel(ndb.Model):
+    """ count view number
+    """
+    name = ndb.StringProperty()
+    count = ndb.IntegerProperty()
+    total = ndb.IntegerProperty()
+
 class PictureModel(db.Model):
     """ picture model
     """

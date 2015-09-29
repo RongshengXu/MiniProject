@@ -38,7 +38,7 @@ STREAM_ENTRY_TEMPLATE = """\
     <a href="%s">
         <div style = "position:relative;">
             <img src="%s" height="100" width="100"></img>
-            <div style = "position: absolute; left:0px; top:0px">%s</div>
+            <div style = "position: relative; left:0px; top:0px">%s</div>
         </div>
     </a>
 </td>

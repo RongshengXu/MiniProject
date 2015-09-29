@@ -1,4 +1,4 @@
-from Stream import PictureModel, StreamModel
+from Stream import PictureModel, StreamModel, CountViewModel
 from google.appengine.api import images
 from google.appengine.api import users
 from google.appengine.ext import ndb
@@ -93,16 +93,22 @@ class Upload(webapp2.RequestHandler):
         picture = self.request.get('file')
         if (len(picture)>0):
             stream_name = re.findall('=(.*)', returnURL)[0]
-            stream_query = StreamModel.query(StreamModel.name==stream_name, StreamModel.author==users.get_current_user())
+            stream_query = StreamModel.query(StreamModel.name==stream_name)
             stream = stream_query.fetch()[0]
-            stream.totalPicture = stream.totalPicture + 1
-            user_picture = PictureModel(parent = db.Key.from_path('StreamModel', stream_name))
-            user_picture.id = str(stream.totalPicture)
-            picture = images.resize(picture, 320, 400)
-            user_picture.picture = db.Blob(picture)
-            user_picture.put()
-            stream.put()
-            #user_picture.picture = db.Blob(image)
+            if (stream.author == users.get_current_user()):
+                stream.totalPicture = stream.totalPicture + 1
+                user_picture = PictureModel(parent = db.Key.from_path('StreamModel', stream_name))
+                user_picture.id = str(stream.totalPicture)
+                picture = images.resize(picture, 320, 400)
+                user_picture.picture = db.Blob(picture)
+                user_picture.put()
+                stream.put()
+            else:
+                countView_query = CountViewModel.query(CountViewModel.name==stream_name).fetch()
+                if len(countView_query)>0:
+                    countView = countView_query[0]
+                    countView.count = countView.count + 1
+                    countView.total = countView.total + 1
         self.redirect(returnURL)
 
 class ShowMore(webapp2.RequestHandler):
@@ -128,6 +134,13 @@ class ShowMore(webapp2.RequestHandler):
         returnURL = urllib.urlencode({'stream':stream_name})
         self.response.write('<br><a href=%s> go back</a></br>' % returnURL)
 
+
+class clearViewCount(webapp2.RequestHandler):
+    def get(self):
+        countView = CountViewModel.query().fetch()
+        if len(countView)>0:
+            for count in countView:
+                count.count = 0
 
 app = webapp2.WSGIApplication([
     ('/showmore.*', ShowMore),
