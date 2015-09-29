@@ -1,5 +1,5 @@
 from Stream import StreamModel
-from Stream import CountModel
+from Stream import CountModel, CountViewModel
 from google.appengine.api import users
 from google.appengine.api import mail
 import webapp2
@@ -51,6 +51,18 @@ DEFAULT_TRENDING_MESSAGE = "Trending update"
 DEFAULT_TRENDING_SUBJECT = "Trending digest from "
 TAEmail = "xurongsheng2010@gmail.com"
 
+STREAM_ENTRY_TEMPLATE = """\
+<td>
+    <a href="%s">
+        <div style = "position:relative;">
+            <img src="%s" height="100" width="100"></img>
+            <div style = "position: relative; left:0px; top:0px">%s</div>
+            <div style = "position: relative; left:0px; top:5px">%s</div>
+        </div>
+    </a>
+</td>
+"""
+
 class Trending(webapp2.RequestHandler):
     def get(self):
         self.response.write(TRENDING_PAGE_TEMPLATE)
@@ -58,11 +70,20 @@ class Trending(webapp2.RequestHandler):
         if len(count_query)==0:
             count = CountModel(name="Trending", count=0, freq=0)
             self.response.write( "Present frequency: No reports")
+            count.put()
         else:
             count = count_query[0]
-            self.response.write(type(count.count))
-            t = count.freq
             self.response.write("Present frequency: "+freq_dict[count.freq])
+        countView_query = CountViewModel.query().order(-CountViewModel.count).fetch()
+        index = 0
+        if len(countView_query)>0:
+            for view in countView_query:
+                if index < 3:
+                    index += 1
+                    stream_query = StreamModel.query(StreamModel.name == view.name).fetch()
+                    if len(stream_query)>0:
+                        stream = stream_query[0]
+                        self.response.write(STREAM_ENTRY_TEMPLATE % (stream.url, stream.coverpageURL, stream.name,"view:" + str(view.count)))
 
 class Update(webapp2.RequestHandler):
     def post(self):

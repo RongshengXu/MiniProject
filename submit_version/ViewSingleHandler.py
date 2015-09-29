@@ -46,6 +46,12 @@ UPLOAD_ENTRY_TEMPLATE = """\
 </form>
 """
 
+SUBSCRIBE_ENTRY_TEMPLATE = """\
+<form action="%s" method="post">
+    <input type="submit" name="Subscribe" value="Subscribe">
+</form>
+"""
+
 MORE_ENTRY_TEMPLATE = """\
 <form action="%s" ,method="post">
     <input type="submit" value="More Pictures">
@@ -77,10 +83,19 @@ class ViewSingle(webapp2.RequestHandler):
                 index += 1
                 self.response.write(PICTURE_ENTRY_TEMPLATE % picture.key())
         self.response.write('</tr></table>')
-
         morePictureURL = urllib.urlencode({'showmore':user.nickname()+"=="+stream_name})
         self.response.write(MORE_ENTRY_TEMPLATE % morePictureURL)
-        self.response.write(UPLOAD_ENTRY_TEMPLATE)
+        if (stream.author == user):
+            self.response.write(UPLOAD_ENTRY_TEMPLATE)
+        else:
+            countView_query = CountViewModel.query(CountViewModel.name==stream_name).fetch()
+            if len(countView_query)>0:
+                countView = countView_query[0]
+                countView.count = countView.count + 1
+                countView.total = countView.total + 1
+                countView.put()
+            url = urllib.urlencode({"subscribe":stream_name})
+            self.response.write(SUBSCRIBE_ENTRY_TEMPLATE, url)
 
 class ViewPictureHandler(webapp2.RequestHandler):
     def get(self):
@@ -103,12 +118,6 @@ class Upload(webapp2.RequestHandler):
                 user_picture.picture = db.Blob(picture)
                 user_picture.put()
                 stream.put()
-            else:
-                countView_query = CountViewModel.query(CountViewModel.name==stream_name).fetch()
-                if len(countView_query)>0:
-                    countView = countView_query[0]
-                    countView.count = countView.count + 1
-                    countView.total = countView.total + 1
         self.redirect(returnURL)
 
 class ShowMore(webapp2.RequestHandler):
@@ -116,8 +125,8 @@ class ShowMore(webapp2.RequestHandler):
         user = re.findall('%3D(.*)%3D%3D', self.request.url)[0]
         stream_name = re.findall('%3D%3D(.*)', self.request.url)[0]
         self.response.write('<h2>%s<h2>' % stream_name)
-        stream_query = StreamModel.query(StreamModel.authorName==user, StreamModel.name==stream_name)
-        #streams = stream_query.fetch()[0]
+        stream_query = StreamModel.query(StreamModel.name==stream_name)
+        stream = stream_query.fetch()[0]
         pictures_query = db.GqlQuery("SELECT *FROM PictureModel WHERE ANCESTOR IS :1 "+
                                      "ORDER BY uploadDate DESC", db.Key.from_path('StreamModel', stream_name))
         index = 0
@@ -131,6 +140,15 @@ class ShowMore(webapp2.RequestHandler):
                 index=0
             else:
                 index += 1
+        if (stream.author == users.get_current_user()):
+            pass
+        else:
+            countView_query = CountViewModel.query(CountViewModel.name==stream_name).fetch()
+            if len(countView_query)>0:
+                countView = countView_query[0]
+                countView.count = countView.count - 1
+                countView.total = countView.total - 1
+                countView.put()
         returnURL = urllib.urlencode({'stream':stream_name})
         self.response.write('<br><a href=%s> go back</a></br>' % returnURL)
 
@@ -141,10 +159,21 @@ class clearViewCount(webapp2.RequestHandler):
         if len(countView)>0:
             for count in countView:
                 count.count = 0
+                count.put()
+
+class Subscirbe(webapp2.RequestHandler):
+    def get(self):
+        stream_name = re.findall("subscribe%3D(.*)",self.request.url)[0]
+        stream_query = StreamModel.query(StreamModel==stream_name).fetch()
+        if len(stream_query)>0:
+            stream = stream_query[0]
+            
 
 app = webapp2.WSGIApplication([
     ('/showmore.*', ShowMore),
     ('/stream.*', ViewSingle),
     ('/upload', Upload),
-    ('/pic.*', ViewPictureHandler)
+    ('/pic.*', ViewPictureHandler),
+    ('/subscribe.*', Subscirbe),
+    ('/clearviewcount', clearViewCount)
 ], debug=True)

@@ -93,10 +93,11 @@ class Create(webapp2.RequestHandler):
             stream.author = users.get_current_user()
             stream.authorName = users.get_current_user().nickname()
             stream.url = urllib.urlencode({'streamname': stream.name})
-            stream.totalPicture = 0;
+            stream.totalPicture = 0
             if (len(stream_subscribers)>0):
                 for email in stream_subscribers:
-                    mail.send_mail(sender=users.get_current_user(), to=email, subject="Create", body="Stream "+ stream_name + " is created")
+                    if len(email)>0:
+                        mail.send_mail(sender=users.get_current_user(), to=email, subject="Create", body="Stream "+ stream_name + " is created")
                 stream.subscribers = stream_subscribers
             if (len(stream_message)>0):
                 stream.message = stream_message
