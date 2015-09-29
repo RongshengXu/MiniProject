@@ -111,7 +111,7 @@ class Update(webapp2.RequestHandler):
 
 class CountDown(webapp2.RequestHandler):
     def get(self):
-        sender = "Connexus@example.com"
+        sender = users.get_current_user().email()
         mail.send_mail(sender=sender, to="xurongsheng2010@gmail.com", subject="test", body=DEFAULT_TRENDING_MESSAGE)
         cd_query = CountModel.query(CountModel.name=="Trending").fetch()
         if (len(cd_query)>0):

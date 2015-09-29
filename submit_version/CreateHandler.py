@@ -97,7 +97,7 @@ class Create(webapp2.RequestHandler):
             if (len(stream_subscribers)>0):
                 for email in stream_subscribers:
                     if len(email)>0:
-                        mail.send_mail(sender=users.get_current_user(), to=email,
+                        mail.send_mail(sender=users.get_current_user().email(), to=email,
                                        subject="Stream "+ stream_name + " is created.", body= stream_message )
                 stream.subscribers = stream_subscribers
             if (len(stream_message)>0):

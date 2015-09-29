@@ -89,7 +89,7 @@ class ViewSingle(webapp2.RequestHandler):
                 index += 1
                 self.response.write(PICTURE_ENTRY_TEMPLATE % picture.key())
         self.response.write('</tr></table>')
-        morePictureURL = urllib.urlencode({'showmore':user.nickname()+"=="+stream_name+"++0"})
+        morePictureURL = urllib.urlencode({'showmore':user.nickname()+"=="+stream_name})
         self.response.write(MORE_ENTRY_TEMPLATE % morePictureURL)
         if (stream.author == user):
             self.response.write(UPLOAD_ENTRY_TEMPLATE)
@@ -129,6 +129,7 @@ class Upload(webapp2.RequestHandler):
                 picture = images.resize(picture, 320, 400)
                 user_picture.picture = db.Blob(picture)
                 user_picture.put()
+                stream.lastUpdated = user_picture.uploadDate
                 stream.put()
         self.redirect(returnURL)
 
