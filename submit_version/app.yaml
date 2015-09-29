@@ -4,6 +4,22 @@ api_version: 1
 threadsafe: true
 
 handlers:
+- url: /social
+  script: SocialHandler.app
+  login: required
+
+- url: /update
+  script: TrendingHandler.app
+  login: required
+
+- url: /trending
+  script: TrendingHandler.app
+  login: required
+
+- url: /countdown
+  script: TrendingHandler.app
+  login: required
+
 - url: /error
   script: ErrorHandler.app
   login: required
@@ -27,6 +43,10 @@ handlers:
   script: ViewHandler.app
   login: required
 
+- url: /searchresult
+  script: SearchHandler.app
+  login: required
+
 - url: /search
   script: SearchHandler.app
   login: required
@@ -45,14 +65,6 @@ handlers:
 
 - url: /stream.*
   script: ViewSingleHandler.app
-  login: required
-
-- url: /trending
-  script: TrendingHandler.app
-  login: required
-
-- url: /social
-  script: SocialHandler.app
   login: required
 
 - url: /.*
