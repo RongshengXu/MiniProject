@@ -4,6 +4,10 @@ from google.appengine.api import users
 from google.appengine.api import mail
 import webapp2
 
+SERVICE_DOMAIN="sacred-highway-108321"
+MAILBOX=".appspotmail.com"
+EMAIL_SENDER="Connexus"
+
 TRENDING_PAGE_TEMPLATE = """\
 <!DOCTYPE html>
 <html>
@@ -89,6 +93,7 @@ class Trending(webapp2.RequestHandler):
 
 class Update(webapp2.RequestHandler):
     def post(self):
+        user = users.get_current_user()
         returnURL = self.request.headers['Referer']
         frequency = self.request.get("frequency")
         count_query = CountModel.query(CountModel.name=="Trending").fetch()
@@ -111,8 +116,7 @@ class Update(webapp2.RequestHandler):
 
 class CountDown(webapp2.RequestHandler):
     def get(self):
-        sender = users.get_current_user().email()
-        mail.send_mail(sender=sender, to="xurongsheng2010@gmail.com", subject="test", body=DEFAULT_TRENDING_MESSAGE)
+        sender = EMAIL_SENDER + "@"+SERVICE_DOMAIN+MAILBOX
         cd_query = CountModel.query(CountModel.name=="Trending").fetch()
         if (len(cd_query)>0):
             cd = cd_query[0]
@@ -120,11 +124,14 @@ class CountDown(webapp2.RequestHandler):
                 cd.count = cd.count + 1
                 if (cd.count == cd.freq):
                     cd.count = 0
-                    subject = DEFAULT_TRENDING_SUBJECT + users.get_current_user()
+                    subject = DEFAULT_TRENDING_SUBJECT + EMAIL_SENDER
                     mail.send_mail(sender=sender, to=TAEmail, subject=subject, body=DEFAULT_TRENDING_MESSAGE)
                     mail.send_mail(sender=sender, to="xurongsheng2010@gmail.com", subject=subject, body=DEFAULT_TRENDING_MESSAGE)
                     mail.send_mail(sender=sender, to="yangxuanemail@gmail.com", subject=subject, body=DEFAULT_TRENDING_MESSAGE)
                 cd.put()
+        #else:
+            #mail.send_mail(sender="test@example.com", to="xurongsheng2010@gmail.com", subject="test", body=DEFAULT_TRENDING_MESSAGE)
+
 
 app = webapp2.WSGIApplication([
     ('/trending', Trending),

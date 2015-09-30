@@ -1,3 +1,4 @@
+application: sacred-highway-108321
 version: 1
 runtime: python27
 api_version: 1
@@ -18,7 +19,7 @@ handlers:
 
 - url: /countdown
   script: TrendingHandler.app
-  login: admin
+  #slogin: admin
 
 - url: /error
   script: ErrorHandler.app
@@ -58,7 +59,7 @@ handlers:
 
 - url: /clearviewcount
   script: ViewSingleHandler.app
-  login: admin
+  #login: admin
 
 - url: /subscribe.*
   script: ViewSingleHandler.app
