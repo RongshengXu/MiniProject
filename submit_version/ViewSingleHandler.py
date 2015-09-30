@@ -9,7 +9,7 @@ import webapp2
 import re
 import urllib
 
-NUM_PICTURE_PER_STREAM = 4
+NUM_PICTURE_PER_STREAM = 3
 
 VIEW_SINGLE_PAGE_TEMPLATE = """\
 <!DOCTYPE html>
@@ -69,6 +69,8 @@ PICTURE_ENTRY_TEMPLATE = """\
 <td><img src="pic?pic_id=%s"></img></td>
 """
 
+index = 0
+
 class ViewSingle(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
@@ -81,15 +83,23 @@ class ViewSingle(webapp2.RequestHandler):
         stream = stream_query.fetch()[0]
 
         self.response.write('<table style="width:100%"><tr>')
-        picture_query = db.GqlQuery("SELECT *FROM PictureModel WHERE ANCESTOR IS :1 ORDER BY uploadDate DESC LIMIT 5",
+        picture_query = db.GqlQuery("SELECT *FROM PictureModel WHERE ANCESTOR IS :1 ORDER BY uploadDate DESC",
                                   db.Key.from_path('StreamModel', stream_name))
-        index = 0
-        for picture in picture_query:
-            if (index < NUM_PICTURE_PER_STREAM):
-                index += 1
+
+        global index
+        showNum = 0
+
+        self.response.write('The total number of picture is ' + str(stream.totalPicture) + ': ')
+        for picture in picture_query[index:stream.totalPicture]:
+            if (showNum < NUM_PICTURE_PER_STREAM):
+                showNum += 1
+                self.response.write(picture.id)
                 self.response.write(PICTURE_ENTRY_TEMPLATE % picture.key())
+
+        self.response.write('showned below.')
         self.response.write('</tr></table>')
-        morePictureURL = urllib.urlencode({'showmore':user.nickname()+"=="+stream_name})
+        # morePictureURL = urllib.urlencode({'showmore':user.nickname()+"=="+stream_name+"++0"})
+        morePictureURL = urllib.urlencode({'showmore':stream_name+"=="+str(index)})
         self.response.write(MORE_ENTRY_TEMPLATE % morePictureURL)
         if (stream.author == user):
             self.response.write(UPLOAD_ENTRY_TEMPLATE)
@@ -128,42 +138,63 @@ class Upload(webapp2.RequestHandler):
                 user_picture.id = str(stream.totalPicture)
                 picture = images.resize(picture, 320, 400)
                 user_picture.picture = db.Blob(picture)
-                user_picture.put()
                 stream.lastUpdated = user_picture.uploadDate
+                user_picture.put()
                 stream.put()
         self.redirect(returnURL)
 
 class ShowMore(webapp2.RequestHandler):
     def get(self):
-        user = re.findall('%3D(.*)%3D%3D', self.request.url)[0]
-        stream_name = re.findall('%3D%3D(.*)', self.request.url)[0]
-        self.response.write('<h2>%s<h2>' % stream_name)
-        stream_query = StreamModel.query(StreamModel.name==stream_name)
-        stream = stream_query.fetch()[0]
-        pictures_query = db.GqlQuery("SELECT *FROM PictureModel WHERE ANCESTOR IS :1 "+
-                                     "ORDER BY uploadDate DESC", db.Key.from_path('StreamModel', stream_name))
-        index = 0
-        for picture in pictures_query:
-            if index==0:
-                self.response.write('<tr>')
-            self.response.write(PICTURE_ENTRY_TEMPLATE % picture.key())
+        returnURL = self.request.headers['Referer']
+        stream_name = re.findall('%3D(.*)%3D%3D', self.request.url)[0]
+        oldIndex = int(re.findall('%3D%3D(.*)', self.request.url)[0])
+        countView_query = CountViewModel.query(CountViewModel.name==stream_name).fetch()
+        if len(countView_query)>0:
+            countView = countView_query[0]
+            countView.count = countView.count - 1
+            countView.total = countView.total - 1
+            countView.put()
+        global index
 
-            if index==5:
-                self.response.write('</tr>')
-                index=0
-            else:
-                index += 1
-        if (stream.author == users.get_current_user()):
-            pass
-        else:
-            countView_query = CountViewModel.query(CountViewModel.name==stream_name).fetch()
-            if len(countView_query)>0:
-                countView = countView_query[0]
-                countView.count = countView.count - 1
-                countView.total = countView.total - 1
-                countView.put()
-        returnURL = urllib.urlencode({'stream':stream_name})
-        self.response.write('<br><a href=%s> go back</a></br>' % returnURL)
+        stream = StreamModel.query(StreamModel.name == stream_name).fetch()[0]
+        index = oldIndex + NUM_PICTURE_PER_STREAM
+        if index >= stream.totalPicture:
+            index = 0
+
+        self.redirect(returnURL)
+
+
+# class ShowMore(webapp2.RequestHandler):
+#     def get(self):
+#         user = re.findall('%3D(.*)%3D%3D', self.request.url)[0]
+#         stream_name = re.findall('%3D%3D(.*)', self.request.url)[0]
+#         self.response.write('<h2>%s<h2>' % stream_name)
+#         stream_query = StreamModel.query(StreamModel.name==stream_name)
+#         stream = stream_query.fetch()[0]
+#         pictures_query = db.GqlQuery("SELECT *FROM PictureModel WHERE ANCESTOR IS :1 "+
+#                                      "ORDER BY uploadDate DESC", db.Key.from_path('StreamModel', stream_name))
+#         index = 0
+#         for picture in pictures_query:
+#             if index==0:
+#                 self.response.write('<tr>')
+#             self.response.write(PICTURE_ENTRY_TEMPLATE % picture.key())
+#
+#             if index==5:
+#                 self.response.write('</tr>')
+#                 index=0
+#             else:
+#                 index += 1
+#         if (stream.author == users.get_current_user()):
+#             pass
+#         else:
+#             countView_query = CountViewModel.query(CountViewModel.name==stream_name).fetch()
+#             if len(countView_query)>0:
+#                 countView = countView_query[0]
+#                 countView.count = countView.count - 1
+#                 countView.total = countView.total - 1
+#                 countView.put()
+#         returnURL = urllib.urlencode({'stream':stream_name})
+#         self.response.write('<br><a href=%s> go back</a></br>' % returnURL)
 
 
 class clearViewCount(webapp2.RequestHandler):
