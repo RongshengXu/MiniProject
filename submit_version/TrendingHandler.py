@@ -3,6 +3,7 @@ from Stream import CountModel, CountViewModel
 from google.appengine.api import users
 from google.appengine.api import mail
 import webapp2
+from ViewHandler import View
 
 SERVICE_DOMAIN="sacred-highway-108321"
 MAILBOX=".appspotmail.com"
@@ -38,7 +39,8 @@ freq_dict = {0: 'No reports', 1:'Every 5 minutes', 12:'Every 1 hour', 288:'Every
 
 DEFAULT_TRENDING_MESSAGE = "Trending update"
 DEFAULT_TRENDING_SUBJECT = "Trending digest from "
-TAEmail = "xurongsheng2010@gmail.com"
+TAEmail1 = "nima.dini@utexas.edu"
+TAEmail2 = "kevzsolo@gmail.com"
 
 STREAM_ENTRY_TEMPLATE = """\
 <td>
@@ -66,6 +68,7 @@ TRENDING_REPORT_TEMPLATE = """\
 
 class Trending(webapp2.RequestHandler):
     def get(self):
+        View.more = True
         self.response.write(TRENDING_PAGE_TEMPLATE)
         countView_query = CountViewModel.query().order(-CountViewModel.count).fetch()
         index = 0
@@ -125,7 +128,8 @@ class CountDown(webapp2.RequestHandler):
                 if (cd.count == cd.freq):
                     cd.count = 0
                     subject = DEFAULT_TRENDING_SUBJECT + EMAIL_SENDER
-                    mail.send_mail(sender=sender, to=TAEmail, subject=subject, body=DEFAULT_TRENDING_MESSAGE)
+                    mail.send_mail(sender=sender, to=TAEmail1, subject=subject, body=DEFAULT_TRENDING_MESSAGE)
+                    mail.send_mail(sender=sender, to=TAEmail2, subject=subject, body=DEFAULT_TRENDING_MESSAGE)
                     mail.send_mail(sender=sender, to="xurongsheng2010@gmail.com", subject=subject, body=DEFAULT_TRENDING_MESSAGE)
                     mail.send_mail(sender=sender, to="yangxuanemail@gmail.com", subject=subject, body=DEFAULT_TRENDING_MESSAGE)
                 cd.put()

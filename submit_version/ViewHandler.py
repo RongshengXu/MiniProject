@@ -45,6 +45,7 @@ STREAM_ENTRY_TEMPLATE = """\
 """
 
 class View(webapp2.RequestHandler):
+    more = True
     def get(self):
         self.response.write(VIEW_PAGE_TEMPLATE)
         stream_query = StreamModel.query().order(StreamModel.createTime)
@@ -52,6 +53,7 @@ class View(webapp2.RequestHandler):
         num = 0
         self.response.write('<table border="0" style="width:100%">')
         if len(streams) > 0:
+            self.more = True
             for stream in streams:
                 if num==0:
                     self.response.write("<tr>")
@@ -63,6 +65,7 @@ class View(webapp2.RequestHandler):
                     num = 0
                 else:
                     num += 1
+
         else:
             self.response.write("<tr><td>No streams are available</td></tr>")
         self.response.write('</table>')

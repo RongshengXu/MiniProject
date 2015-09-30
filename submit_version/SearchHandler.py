@@ -2,6 +2,7 @@ from Stream import StreamModel
 from google.appengine.api import users
 import webapp2
 import re
+from ViewHandler import View
 
 SEARCH_PAGE_TEMPLATE = """\
 <!DOCTYPE html>
@@ -50,6 +51,7 @@ SEARCH_RESULT_PAGE = """\
 
 class Search(webapp2.RequestHandler):
     def get(self):
+        View.more = True
         self.response.write(SEARCH_PAGE_TEMPLATE)
 
 class SearchResult(webapp2.RequestHandler):

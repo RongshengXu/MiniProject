@@ -5,6 +5,7 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import ndb
 import webapp2
+from ViewHandler import View
 
 MANAGEMENT_PAGE_TEMPLATE ="""\
 <!DOCTYPE html>
@@ -55,7 +56,7 @@ STREAM_I_SUBSCRIBE_ENTRY = """\
 class ManagementPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
-
+        View.more = True
         if (user):
             url = users.create_logout_url(self.request.url)
             url_linktext = 'Logout'

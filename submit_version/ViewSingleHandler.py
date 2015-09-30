@@ -4,6 +4,7 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 from google.appengine.ext import db
 from google.appengine.ext import blobstore
+from ViewHandler import View
 
 import webapp2
 import re
@@ -75,10 +76,8 @@ class ViewSingle(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         stream_name = re.findall('%3D(.*)', self.request.url)[0]
-        #self.response.write(stream_name)
         self.response.write(VIEW_SINGLE_PAGE_TEMPLATE)
         self.response.write('<h3>%s</h3>' % stream_name)
-        # stream_query = StreamModel.query(StreamModel.name==stream_name, StreamModel.author==user)
         stream_query = StreamModel.query(StreamModel.name==stream_name)
         stream = stream_query.fetch()[0]
 
@@ -105,19 +104,21 @@ class ViewSingle(webapp2.RequestHandler):
             self.response.write(UPLOAD_ENTRY_TEMPLATE)
         else:
             countView_query = CountViewModel.query(CountViewModel.name==stream_name).fetch()
-            if len(countView_query)>0:
+            #if len(countView_query)>0:
+            if View.more == True:
                 countView = countView_query[0]
                 countView.count = countView.count + 1
                 countView.total = countView.total + 1
                 countView.put()
+            View.more = False
             url = urllib.urlencode({'subscribe':stream_name})
-
             if user.nickname() in stream.subscribers:
                 url = urllib.urlencode({'unsubscribesingle':stream_name})
                 self.response.write(UNSUBSCRIBE_ENTRY_TEMPLATE % url)
             else:
                 url = urllib.urlencode({'subscribe':stream_name})
                 self.response.write(SUBSCRIBE_ENTRY_TEMPLATE % url)
+
 
 class ViewPictureHandler(webapp2.RequestHandler):
     def get(self):
@@ -145,19 +146,21 @@ class Upload(webapp2.RequestHandler):
 
 class ShowMore(webapp2.RequestHandler):
     def get(self):
+        global index
         returnURL = self.request.headers['Referer']
         stream_name = re.findall('%3D(.*)%3D%3D', self.request.url)[0]
         oldIndex = int(re.findall('%3D%3D(.*)', self.request.url)[0])
-        countView_query = CountViewModel.query(CountViewModel.name==stream_name).fetch()
+        #countView_query = CountViewModel.query(CountViewModel.name==stream_name).fetch()
         stream = StreamModel.query(StreamModel.name == stream_name).fetch()[0]
 
-        if len(countView_query)>0 and stream.author != users.get_current_user():
-            countView = countView_query[0]
-            countView.count = countView.count - 1
-            countView.total = countView.total - 1
-            countView.put()
-        global index
-
+        #if stream.author == users.get_current_user():
+        #    pass
+        #else:
+        # countView = countView_query[0]
+        # self.response.write(countView.count)
+        # countView.count = countView.count - 1
+        # countView.total = countView.total - 1
+        # countView.put()
         index = oldIndex + NUM_PICTURE_PER_STREAM
         if index >= stream.totalPicture:
             index = 0
